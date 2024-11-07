@@ -8,3 +8,5 @@
         }
     }
 }
+Console.Writeline("test")
+    

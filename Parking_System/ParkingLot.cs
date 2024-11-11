@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ParkingSystem
+using System.Threading;
+namespace Parking_System
 {
     // Parkeringssystemsklass
     class ParkingLot
@@ -45,13 +43,21 @@ namespace ParkingSystem
             _parkedVehicles.Remove(vehicleData);
             return true;
         }
+
         public void DisplayParkingLot()
         {
             Console.WriteLine("Parkeringsstatus:");
-            foreach (var (vehicle, parkingTime) in _parkedVehicles)
+            if (_parkedVehicles.Count == 0)
             {
-                var remainingTime = Math.Max(0, (int)(parkingTime - DateTime.Now).TotalSeconds);
-                Console.WriteLine($"Fordon {vehicle.RegNumber} ({vehicle.Color}), {remainingTime} sek kvar.");
+                Console.WriteLine("Ingen parkerad bil.");
+            }
+            else
+            {
+                foreach (var (vehicle, parkingTime) in _parkedVehicles)
+                {
+                    var remainingTime = Math.Max(0, (int)(parkingTime - DateTime.Now).TotalSeconds);
+                    Console.WriteLine($"Fordon {vehicle.RegNumber} ({vehicle.Color}), {remainingTime} sek kvar.");
+                }
             }
         }
 
@@ -59,6 +65,12 @@ namespace ParkingSystem
         {
             double usedSpots = _parkedVehicles.Sum(v => v.Item1.SpotsNeeded);
             return _totalSpots - usedSpots;
+        }
+
+        public void ShowParkingInfo()
+        {
+            Console.WriteLine($"Totalt antal platser: {_totalSpots}");
+            Console.WriteLine($"Lediga platser: {GetFreeSpots()}");
         }
     }
 
@@ -73,5 +85,4 @@ namespace ParkingSystem
             return letters + numbers;
         }
     }
-
 }

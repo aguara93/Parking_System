@@ -1,4 +1,4 @@
-﻿namespace ParkingSystem
+﻿namespace Parking_System
 {
     public class Program
     {
@@ -6,27 +6,138 @@
         {
             ParkingLot parkingLot = new ParkingLot();
 
-            // Skapa generellt fordon och specialiserade fordon
-            Vehicle genericVehicle = new Vehicle(Helper.GenerateRegNumber(), "Blå");
-            Car car = new Car(Helper.GenerateRegNumber(), "Röd", true);
-            Motorcycle motorcycle = new Motorcycle(Helper.GenerateRegNumber(), "Svart", "Yamaha");
-            Bus bus = new Bus(Helper.GenerateRegNumber(), "Gul", 55);
+            // Skapa några fordon slumpmässigt och parkera dem i systemet
+            Random rand = new Random();
+            for (int i = 0; i < 5; i++) // Lägg till 5 slumpmässiga fordon
+            {
+                string regNumber = Helper.GenerateRegNumber();
+                string color = rand.Next(0, 2) == 0 ? "Röd" : "Blå";
+                Vehicle vehicle;
+                if (rand.Next(0, 3) == 0)
+                {
+                    vehicle = new Car(regNumber, color, rand.Next(0, 2) == 0);
+                }
+                else if (rand.Next(0, 3) == 1)
+                {
+                    vehicle = new Motorcycle(regNumber, color, "Yamaha");
+                }
+                else
+                {
+                    vehicle = new Bus(regNumber, color, 50);
+                }
 
-            // Lägg till fordon med angiven parkeringstid i sekunder
-            parkingLot.AddVehicle(genericVehicle, 45); // Generellt fordon med 45 sek parkeringstid
-            parkingLot.AddVehicle(car, 30);            // Bil med 30 sek parkeringstid
-            parkingLot.AddVehicle(motorcycle, 60);     // Motorcykel med 60 sek parkeringstid
-            parkingLot.AddVehicle(bus, 120);           // Buss med 120 sek parkeringstid
+                parkingLot.AddVehicle(vehicle, rand.Next(30, 120)); // Slumpmässig parkeringstid mellan 30-120 sek
+            }
 
-            // Visa parkeringsstatus
-            parkingLot.DisplayParkingLot();
+            while (true)
+            {
+                Console.WriteLine("Välj användartyp:");
+                Console.WriteLine("1. Chef (Hantera parkeringen)");
+                Console.WriteLine("2. Vakt (Parkera/Släpp ut fordon)");
+                Console.WriteLine("3. Kund (Se status och parkera fordon)");
+                Console.WriteLine("4. Avsluta");
+                string choice = Console.ReadLine();
 
-            // Simulera att tiden går och checka ut fordon
-            Thread.Sleep(5000);  // Vänta 5 sekunder
-            parkingLot.ReleaseVehicle(genericVehicle.RegNumber);
+                switch (choice)
+                {
+                    case "1": // Chef
+                        Console.WriteLine("\n** Chef - Hantera Parkeringen **");
+                        parkingLot.ShowParkingInfo();
+                        break;
 
-            // Visa uppdaterad status
-            parkingLot.DisplayParkingLot();
+                    case "2": // Vakt
+                        Console.WriteLine("\n** Vakt - Parkera/Släpp ut Fordon **");
+                        Console.WriteLine("1. Parkera Fordon");
+                        Console.WriteLine("2. Släpp ut Fordon");
+                        string guardChoice = Console.ReadLine();
+
+                        if (guardChoice == "1")
+                        {
+                            Console.WriteLine("Ange fordonets typ (Bil/Motorcykel/Buss):");
+                            string vehicleType = Console.ReadLine();
+                            Console.WriteLine("Ange registreringsnummer:");
+                            string regNumber = Console.ReadLine();
+                            Vehicle vehicle = null;
+
+                            if (vehicleType.ToLower() == "bil")
+                                vehicle = new Car(regNumber, "Blå", true);
+                            else if (vehicleType.ToLower() == "motorcykel")
+                                vehicle = new Motorcycle(regNumber, "Svart", "Yamaha");
+                            else if (vehicleType.ToLower() == "buss")
+                                vehicle = new Bus(regNumber, "Gul", 55);
+
+                            if (vehicle != null)
+                            {
+                                parkingLot.AddVehicle(vehicle, 60); // Parkeringstid på 60 sekunder
+                            }
+                        }
+                        else if (guardChoice == "2")
+                        {
+                            Console.WriteLine("Ange registreringsnummer för fordon som ska släppas ut:");
+                            string regNumber = Console.ReadLine();
+                            parkingLot.ReleaseVehicle(regNumber);
+                        }
+                        break;
+
+                    case "3": // Kund
+                        Console.WriteLine("\n** Kund - Välj ett alternativ **");
+                        Console.WriteLine("1. Se Parkeringsstatus");
+                        Console.WriteLine("2. Parkera ett Fordon");
+                        Console.WriteLine("3. Släpp ut ett Fordon");
+                        Console.WriteLine("4. Tillbaka");
+                        string customerChoice = Console.ReadLine();
+
+                        if (customerChoice == "1")
+                        {
+                            parkingLot.DisplayParkingLot();
+                        }
+                        else if (customerChoice == "2")
+                        {
+                            Console.WriteLine("Ange fordonets typ (Bil/Motorcykel/Buss):");
+                            string vehicleType = Console.ReadLine();
+                            Console.WriteLine("Ange registreringsnummer:");
+                            string regNumber = Console.ReadLine();
+                            Console.WriteLine("Ange parkeringstid i sekunder:");
+                            int parkingTime = int.Parse(Console.ReadLine());
+                            Vehicle vehicle = null;
+
+                            if (vehicleType.ToLower() == "bil")
+                                vehicle = new Car(regNumber, "Blå", true);
+                            else if (vehicleType.ToLower() == "motorcykel")
+                                vehicle = new Motorcycle(regNumber, "Svart", "Yamaha");
+                            else if (vehicleType.ToLower() == "buss")
+                                vehicle = new Bus(regNumber, "Gul", 55);
+
+                            if (vehicle != null)
+                            {
+                                parkingLot.AddVehicle(vehicle, parkingTime);
+                            }
+                        }
+                        else if (customerChoice == "3")
+                        {
+                            Console.WriteLine("Ange registreringsnummer för fordon som ska släppas ut:");
+                            string regNumber = Console.ReadLine();
+                            parkingLot.ReleaseVehicle(regNumber);
+                        }
+                        else if (customerChoice == "4")
+                        {
+                            continue; // Gå tillbaka till huvudmenyn
+                        }
+                        break;
+
+
+                    case "4": // Avsluta
+                        Console.WriteLine("Avslutar programmet.");
+                        return;
+
+                    default:
+                        Console.WriteLine("Ogiltigt val, försök igen.");
+                        break;
+                }
+                Console.WriteLine("\nTryck på en tangent för att fortsätta...");
+                Console.ReadKey();
+                Console.Clear();
+            }
         }
     }
 }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace ParkingSystem
+namespace Parking_System
 {
-    // Fordonsklasser - konkret basklass
+    // Fordonsklasser
     class Vehicle
     {
         public string RegNumber { get; }
@@ -17,12 +17,10 @@ namespace ParkingSystem
             Color = color;
         }
 
-        // Standardvärden för generella fordon
-        public virtual double SpotsNeeded => 1;  // Anta att en vanlig fordonstyp tar 1 parkeringsplats
+        public virtual double SpotsNeeded => 1;  // Standardstorlek på parkeringsplats
         public virtual double CalculateParkingFee(int parkedSeconds) => parkedSeconds * 1.5;  // Standardavgift
     }
 
-    // Specialklasser
     class Car : Vehicle
     {
         public bool IsElectric { get; }

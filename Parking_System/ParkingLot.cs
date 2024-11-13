@@ -9,18 +9,43 @@ namespace Parking_System
     {
         private readonly int _totalSpots;
         private readonly List<(Vehicle, DateTime)> _parkedVehicles = new List<(Vehicle, DateTime)>();
+        private readonly List<(Vehicle, DateTime, bool)> _luxuryParkedVehicles = new List<(Vehicle, DateTime, bool)>(); // Lyxparkering
+        private readonly List<string> _fines = new List<string>(); // Böter
 
         public ParkingLot(int totalSpots = 25)
         {
             _totalSpots = totalSpots;
         }
 
-        public bool AddVehicle(Vehicle vehicle, int parkingDurationSeconds)
+        public bool AddVehicle(Vehicle vehicle, int parkingDurationSeconds, bool isLuxurySpot = false)
         {
+            if (isLuxurySpot && !(vehicle is Car))
+            {
+                Console.WriteLine("Endast bilar kan parkera på lyxparkeringen.");
+                return false;
+            }
+
             if (GetFreeSpots() >= vehicle.SpotsNeeded)
             {
-                _parkedVehicles.Add((vehicle, DateTime.Now.AddSeconds(parkingDurationSeconds)));
-                Console.WriteLine($"Fordon {vehicle.RegNumber} tilldelat plats i parkeringen.");
+                if (isLuxurySpot)
+                {
+                    _luxuryParkedVehicles.Add((vehicle, DateTime.Now.AddSeconds(parkingDurationSeconds), false)); // Sätt "false" tills vakten ser böterna
+                }
+                else
+                {
+                    _parkedVehicles.Add((vehicle, DateTime.Now.AddSeconds(parkingDurationSeconds)));
+                }
+
+                double fee = vehicle.CalculateParkingFee(parkingDurationSeconds);
+                if (isLuxurySpot)
+                {
+                    fee *= 1.5; // 50% mer för lyxparkering
+                    Console.WriteLine($"Fordon {vehicle.RegNumber} parkerar på lyxparkering. Avgift: {fee:F2} kr.");
+                }
+                else
+                {
+                    Console.WriteLine($"Fordon {vehicle.RegNumber} parkerar. Avgift: {fee:F2} kr.");
+                }
                 return true;
             }
             Console.WriteLine("Ingen ledig plats för detta fordon.");
@@ -44,10 +69,28 @@ namespace Parking_System
             return true;
         }
 
+        // Funktion för att sätta böter
+        public void AssignFine(string regNumber)
+        {
+            var vehicleData = _parkedVehicles.FirstOrDefault(v => v.Item1.RegNumber == regNumber);
+            if (vehicleData == default)
+            {
+                Console.WriteLine("Fordon ej funnet.");
+                return;
+            }
+
+            var parkedSeconds = (int)(DateTime.Now - vehicleData.Item2).TotalSeconds;
+            double fine = 500; // Bötesbelopp
+            Console.WriteLine($"Fordon {vehicleData.Item1.RegNumber} har överskridit parkeringstiden. Böter: {fine} kr.");
+            _fines.Add($"{vehicleData.Item1.RegNumber} - Böter: {fine} kr");
+
+            _parkedVehicles.Remove(vehicleData);
+        }
+
         public void DisplayParkingLot()
         {
             Console.WriteLine("Parkeringsstatus:");
-            if (_parkedVehicles.Count == 0)
+            if (_parkedVehicles.Count == 0 && _luxuryParkedVehicles.Count == 0)
             {
                 Console.WriteLine("Ingen parkerad bil.");
             }
@@ -57,6 +100,11 @@ namespace Parking_System
                 {
                     var remainingTime = Math.Max(0, (int)(parkingTime - DateTime.Now).TotalSeconds);
                     Console.WriteLine($"Fordon {vehicle.RegNumber} ({vehicle.Color}), {remainingTime} sek kvar.");
+                }
+                foreach (var (vehicle, parkingTime, fineIssued) in _luxuryParkedVehicles)
+                {
+                    var remainingTime = Math.Max(0, (int)(parkingTime - DateTime.Now).TotalSeconds);
+                    Console.WriteLine($"Lyxparkering - Fordon {vehicle.RegNumber} ({vehicle.Color}), {remainingTime} sek kvar.");
                 }
             }
         }

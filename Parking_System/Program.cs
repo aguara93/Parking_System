@@ -49,6 +49,7 @@
                         Console.WriteLine("\n** Vakt - Parkera/Släpp ut Fordon **");
                         Console.WriteLine("1. Parkera Fordon");
                         Console.WriteLine("2. Släpp ut Fordon");
+                        Console.WriteLine("3. Ge böten.");
                         string guardChoice = Console.ReadLine();
 
                         if (guardChoice == "1")
@@ -77,13 +78,19 @@
                             string regNumber = Console.ReadLine();
                             parkingLot.ReleaseVehicle(regNumber);
                         }
+                        else if (guardChoice == "3")
+                        {
+                            Console.WriteLine("Ange registreringsnummer för fordon som ska få böter:");
+                            string regNumber = Console.ReadLine();
+                            parkingLot.AssignFine(regNumber);
+                        }
                         break;
 
                     case "3": // Kund
                         Console.WriteLine("\n** Kund - Välj ett alternativ **");
-                        Console.WriteLine("1. Se Parkeringsstatus");
-                        Console.WriteLine("2. Parkera ett Fordon");
-                        Console.WriteLine("3. Släpp ut ett Fordon");
+                        Console.WriteLine("1. Se parkeringsstatus");
+                        Console.WriteLine("2. Parkera ett fordon");
+                        Console.WriteLine("3. Avstuta parkering");
                         Console.WriteLine("4. Tillbaka");
                         string customerChoice = Console.ReadLine();
 
@@ -115,7 +122,7 @@
                         }
                         else if (customerChoice == "3")
                         {
-                            Console.WriteLine("Ange registreringsnummer för fordon som ska släppas ut:");
+                            Console.WriteLine("Ange registreringsnummer för fordon som ska avslutas parkiering:");
                             string regNumber = Console.ReadLine();
                             parkingLot.ReleaseVehicle(regNumber);
                         }

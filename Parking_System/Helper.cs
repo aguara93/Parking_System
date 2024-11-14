@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Parking_System
 {
-    // Hjälpfunktion för att skapa slumpmässiga registreringsnummer
+  
     static class Helper
     {
         private static Random random = new Random();

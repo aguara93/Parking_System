@@ -45,11 +45,11 @@
                         parkingLot.ShowParkingInfo();
                         break;
 
-                    case "2": // Vakt
+                    case "2": // Vakt - Parkera eller släpp ut fordon
                         Console.WriteLine("\n** Vakt - Parkera/Släpp ut Fordon **");
                         Console.WriteLine("1. Parkera Fordon");
                         Console.WriteLine("2. Släpp ut Fordon");
-                        Console.WriteLine("3. Ge böten.");
+                        Console.WriteLine("3. Sätt böter på parkeringsöverträdelser");
                         string guardChoice = Console.ReadLine();
 
                         if (guardChoice == "1")
@@ -61,28 +61,31 @@
                             Vehicle vehicle = null;
 
                             if (vehicleType.ToLower() == "bil")
-                                vehicle = new Car(regNumber, "Blå", true);
+                                vehicle = new Car(regNumber, "Blå", true);  // Skapa en bil
                             else if (vehicleType.ToLower() == "motorcykel")
-                                vehicle = new Motorcycle(regNumber, "Svart", "Yamaha");
+                                vehicle = new Motorcycle(regNumber, "Svart", "Yamaha");  // Skapa en motorcykel
                             else if (vehicleType.ToLower() == "buss")
-                                vehicle = new Bus(regNumber, "Gul", 55);
+                                vehicle = new Bus(regNumber, "Gul", 55);  // Skapa en buss
 
                             if (vehicle != null)
                             {
-                                parkingLot.AddVehicle(vehicle, 60); // Parkeringstid på 60 sekunder
+                                Console.WriteLine("Ange parkeringstid i sekunder:");
+                                int parkingTime = int.Parse(Console.ReadLine());
+                                parkingLot.AddVehicle(vehicle, parkingTime);  // Parkera fordonet
                             }
                         }
                         else if (guardChoice == "2")
                         {
                             Console.WriteLine("Ange registreringsnummer för fordon som ska släppas ut:");
                             string regNumber = Console.ReadLine();
-                            parkingLot.ReleaseVehicle(regNumber);
+                            parkingLot.ReleaseVehicle(regNumber);  // Släpp ut fordon
                         }
                         else if (guardChoice == "3")
                         {
-                            Console.WriteLine("Ange registreringsnummer för fordon som ska få böter:");
-                            string regNumber = Console.ReadLine();
-                            parkingLot.AssignFine(regNumber);
+                            Console.WriteLine("Har parkeringsvakten sett överträdelser? (Ja/Nej):");
+                            string seenFineResponse = Console.ReadLine();
+                            bool hasSeenFine = seenFineResponse.ToLower() == "ja";  // Vakten ser om böter ska sättas
+                            parkingLot.SetFinesForOverstays(hasSeenFine);  // Applicera böter om vakten har sett det
                         }
                         break;
 

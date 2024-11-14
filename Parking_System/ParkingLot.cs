@@ -8,50 +8,75 @@ namespace Parking_System
     class ParkingLot
     {
         private readonly int _totalSpots;
-        private readonly List<(Vehicle, DateTime)> _parkedVehicles = new List<(Vehicle, DateTime)>();
-        private readonly List<(Vehicle, DateTime, bool)> _luxuryParkedVehicles = new List<(Vehicle, DateTime, bool)>(); // Lyxparkering
-        private readonly List<string> _fines = new List<string>(); // Böter
+        private readonly List<(Vehicle, DateTime, int)> _parkedVehicles = new List<(Vehicle, DateTime, int)>(); // fordon, tid, plats index
 
+        // För att hålla reda på vilka platser som är upptagna
+        private readonly List<bool> _parkingSpaces;
+        private readonly List<int> _premiumSpots; // lyxplatser
+        private static bool hasSeenFine = false; // om vakten markerade en fordon som ska ha boten
+        
         public ParkingLot(int totalSpots = 25)
         {
             _totalSpots = totalSpots;
+            _parkingSpaces = new List<bool>(new bool[totalSpots]); // Alla platser tomma
+            _premiumSpots = new List<int> { 0, 1, 2 }; // forsta tre platser ar lyxiga
         }
-
-        public bool AddVehicle(Vehicle vehicle, int parkingDurationSeconds, bool isLuxurySpot = false)
+        
+        // funktion att hitta en ledig plats
+        private int GetFreeSpot(double spotsNeeded)
         {
-            if (isLuxurySpot && !(vehicle is Car))
+            int consecutiveSpacesNeeded = (int)Math.Ceiling(spotsNeeded);  // För att säkerställa att vi får plats för hela fordonet
+            for (int i = 0; i <= _parkingSpaces.Count - consecutiveSpacesNeeded; i++)
             {
-                Console.WriteLine("Endast bilar kan parkera på lyxparkeringen.");
+                bool isFree = true;
+                for (int j = 0; j < consecutiveSpacesNeeded; j++)
+                {
+                    if (_parkingSpaces[i + j])
+                    {
+                        isFree = false;
+                        break;
+                    }
+                }
+
+                if (isFree) return i;  // Returnera första lediga platsen
+            }
+
+            return -1;  // Ingen ledig plats
+        }
+        
+        // lagger till ett fordon pa parkiering
+        public bool AddVehicle(Vehicle vehicle, int parkingDurationSeconds)
+        {
+            int freeSpot = GetFreeSpot(vehicle.SpotsNeeded);
+            if (freeSpot == -1)
+            {
+                Console.WriteLine("Ingen ledig plats för detta fordon.");
                 return false;
             }
 
-            if (GetFreeSpots() >= vehicle.SpotsNeeded)
+            // fragan om bil vill ha lyx plats om de ar ledig
+            if (vehicle is Car && _premiumSpots.Contains(freeSpot))
             {
-                if (isLuxurySpot)
+                Console.WriteLine("Vill du parkera på en bekvämare plats nära utgången? (Ja/Nej)");
+                string response = Console.ReadLine().ToLower();
+                if (response == "ja")
                 {
-                    _luxuryParkedVehicles.Add((vehicle, DateTime.Now.AddSeconds(parkingDurationSeconds), false)); // Sätt "false" tills vakten ser böterna
+                    freeSpot = _premiumSpots.First();
                 }
-                else
-                {
-                    _parkedVehicles.Add((vehicle, DateTime.Now.AddSeconds(parkingDurationSeconds)));
-                }
-
-                double fee = vehicle.CalculateParkingFee(parkingDurationSeconds);
-                if (isLuxurySpot)
-                {
-                    fee *= 1.5; // 50% mer för lyxparkering
-                    Console.WriteLine($"Fordon {vehicle.RegNumber} parkerar på lyxparkering. Avgift: {fee:F2} kr.");
-                }
-                else
-                {
-                    Console.WriteLine($"Fordon {vehicle.RegNumber} parkerar. Avgift: {fee:F2} kr.");
-                }
-                return true;
             }
-            Console.WriteLine("Ingen ledig plats för detta fordon.");
-            return false;
-        }
 
+            // Markera platserna som upptagna
+            for (int i = freeSpot; i < freeSpot + (int)Math.Ceiling(vehicle.SpotsNeeded); i++)
+            {
+                _parkingSpaces[i] = true;
+            }
+
+            // Lägg till fordonet på parkeringsplatsen
+            _parkedVehicles.Add((vehicle, DateTime.Now.AddSeconds(parkingDurationSeconds), freeSpot));
+            Console.WriteLine($"Fordon {vehicle.RegNumber} tilldelas plats {freeSpot + 1}. Parkeringstid: {parkingDurationSeconds} sekunder.");
+            return true;
+        }
+        // slapp ut fordon fran parkieringplatsen, rakna avgift
         public bool ReleaseVehicle(string regNumber)
         {
             var vehicleData = _parkedVehicles.FirstOrDefault(v => v.Item1.RegNumber == regNumber);
@@ -63,74 +88,56 @@ namespace Parking_System
 
             var parkedSeconds = (int)(DateTime.Now - vehicleData.Item2).TotalSeconds;
             double fee = vehicleData.Item1.CalculateParkingFee(parkedSeconds);
+
+            // om fordon har parkerat for lange pa platsen och om vakten har sett det da far det boten
+            if (parkedSeconds > 0 && hasSeenFine)
+            {
+                Console.WriteLine("Parkeringsböter på 500 kr appliceras.");
+                fee += 500; // lagger till boten
+            }
+
             Console.WriteLine($"{vehicleData.Item1.RegNumber} lämnar parkeringen. Avgift: {fee:F2} kr.");
 
+            // lamnar parkeringplatsen
+            for (int i = vehicleData.Item3; i < vehicleData.Item3 + (int)Math.Ceiling(vehicleData.Item1.SpotsNeeded); i++)
+            {
+                _parkingSpaces[i] = false;
+            }
+
+            // raderar en fordon fran listan 
             _parkedVehicles.Remove(vehicleData);
             return true;
         }
 
-        // Funktion för att sätta böter
-        public void AssignFine(string regNumber)
-        {
-            var vehicleData = _parkedVehicles.FirstOrDefault(v => v.Item1.RegNumber == regNumber);
-            if (vehicleData == default)
-            {
-                Console.WriteLine("Fordon ej funnet.");
-                return;
-            }
-
-            var parkedSeconds = (int)(DateTime.Now - vehicleData.Item2).TotalSeconds;
-            double fine = 500; // Bötesbelopp
-            Console.WriteLine($"Fordon {vehicleData.Item1.RegNumber} har överskridit parkeringstiden. Böter: {fine} kr.");
-            _fines.Add($"{vehicleData.Item1.RegNumber} - Böter: {fine} kr");
-
-            _parkedVehicles.Remove(vehicleData);
-        }
-
+        // visar status pa alla parkerade fordon
         public void DisplayParkingLot()
         {
             Console.WriteLine("Parkeringsstatus:");
-            if (_parkedVehicles.Count == 0 && _luxuryParkedVehicles.Count == 0)
+            if (_parkedVehicles.Count == 0)
             {
                 Console.WriteLine("Ingen parkerad bil.");
             }
             else
             {
-                foreach (var (vehicle, parkingTime) in _parkedVehicles)
+                foreach (var (vehicle, parkingTime, spotIndex) in _parkedVehicles)
                 {
                     var remainingTime = Math.Max(0, (int)(parkingTime - DateTime.Now).TotalSeconds);
-                    Console.WriteLine($"Fordon {vehicle.RegNumber} ({vehicle.Color}), {remainingTime} sek kvar.");
-                }
-                foreach (var (vehicle, parkingTime, fineIssued) in _luxuryParkedVehicles)
-                {
-                    var remainingTime = Math.Max(0, (int)(parkingTime - DateTime.Now).TotalSeconds);
-                    Console.WriteLine($"Lyxparkering - Fordon {vehicle.RegNumber} ({vehicle.Color}), {remainingTime} sek kvar.");
+                    Console.WriteLine($"Plats {spotIndex + 1} - {vehicle.GetType().Name} {vehicle.RegNumber} {vehicle.Color} ({remainingTime} sek kvar)");
                 }
             }
-        }
-
-        private double GetFreeSpots()
-        {
-            double usedSpots = _parkedVehicles.Sum(v => v.Item1.SpotsNeeded);
-            return _totalSpots - usedSpots;
         }
 
         public void ShowParkingInfo()
         {
             Console.WriteLine($"Totalt antal platser: {_totalSpots}");
-            Console.WriteLine($"Lediga platser: {GetFreeSpots()}");
+            Console.WriteLine($"Lediga platser: {_parkingSpaces.Count(p => !p)}");
         }
-    }
 
-    // Hjälpfunktion för att skapa slumpmässiga registreringsnummer
-    static class Helper
-    {
-        private static Random random = new Random();
-        public static string GenerateRegNumber()
+        // Sätt om vakten har sett böterna
+        public static void SetHasSeenFine(bool seen)
         {
-            string letters = new string(Enumerable.Range(0, 3).Select(_ => (char)random.Next('A', 'Z')).ToArray());
-            string numbers = new string(Enumerable.Range(0, 3).Select(_ => (char)random.Next('0', '9')).ToArray());
-            return letters + numbers;
+            hasSeenFine = seen;
         }
     }
 }
+

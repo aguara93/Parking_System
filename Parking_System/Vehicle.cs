@@ -31,6 +31,11 @@ namespace Parking_System
         }
 
         public override double SpotsNeeded => 1;
+        public override double CalculateParkingFee(int parkedSeconds)
+        {
+            double baseFee = parkedSeconds * 1.5;
+            return baseFee;
+        }
     }
 
     class Motorcycle : Vehicle

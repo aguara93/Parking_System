@@ -47,7 +47,7 @@ namespace Parking_System
             Brand = brand;
         }
 
-        public override double SpotsNeeded => 0.5;
+        public override double SpotsNeeded => 0.5;  // MC tar mindre plats
     }
 
     class Bus : Vehicle
@@ -59,6 +59,6 @@ namespace Parking_System
             PassengerCount = passengerCount;
         }
 
-        public override double SpotsNeeded => 2;
+        public override double SpotsNeeded => 2;  // Bussar tar mer plats
     }
 }

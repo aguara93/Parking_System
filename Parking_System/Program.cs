@@ -20,19 +20,19 @@ namespace Parking_System
 
                 switch (choice)
                 {
-                    case "1": // Chef
+                    case "1": 
                         Console.WriteLine("\n** Chef - Hantera Parkeringen **");
                         parkingLot.ShowParkingInfo();
                         break;
 
-                    case "2": // Vakt
+                    case "2": 
                         Console.WriteLine("\n** Vakt - Parkera/Släpp ut Fordon och Ge Böter **");
                         Console.WriteLine("1. Parkera Fordon");
                         Console.WriteLine("2. Släpp ut Fordon");
                         Console.WriteLine("3. Ge Böter");
                         string guardChoice = Console.ReadLine();
 
-                        if (guardChoice == "1") // Parkera Fordon
+                        if (guardChoice == "1")
                         {
                             Console.WriteLine("Ange typ av fordon: Bil, MC, Buss");
                             string vehicleType = Console.ReadLine().ToLower();
@@ -62,13 +62,13 @@ namespace Parking_System
                                 Console.WriteLine("Ogiltig fordonstyp.");
                             }
                         }
-                        else if (guardChoice == "2") // Släpp ut Fordon
+                        else if (guardChoice == "2") 
                         {
                             Console.WriteLine("Ange registreringsnummer för fordon som ska släppas ut:");
                             string regNumber = Console.ReadLine();
                             parkingLot.ReleaseVehicle(regNumber);
                         }
-                        else if (guardChoice == "3") // Ge Böter
+                        else if (guardChoice == "3") 
                         {
                             Console.WriteLine("Har du sett att ett fordon står för länge? (Ja/Nej)");
                             string seenFine = Console.ReadLine().ToLower();
@@ -86,18 +86,18 @@ namespace Parking_System
                         }
                         break;
 
-                    case "3": // Kund
+                    case "3":
                         Console.WriteLine("\n** Kund - Se status, parkera och kontrollera böter **");
                         Console.WriteLine("1. Se Parkeringsstatus");
                         Console.WriteLine("2. Parkera Fordon");
                         Console.WriteLine("3. Kontrollera om jag har böter");
                         string customerChoice = Console.ReadLine();
 
-                        if (customerChoice == "1") // Visa parkeringsstatus
+                        if (customerChoice == "1") 
                         {
                             parkingLot.DisplayParkingLot();
                         }
-                        else if (customerChoice == "2") // Parkera fordon
+                        else if (customerChoice == "2")
                         {
                             Console.WriteLine("Ange typ av fordon: Bil, MC, Buss");
                             string vehicleType = Console.ReadLine().ToLower();
@@ -127,8 +127,8 @@ namespace Parking_System
                                 Console.WriteLine("Ogiltig fordonstyp.");
                             }
                         }
-                        // För att skriva ut böter om de finns
-                        else if (customerChoice == "3") // Kontrollera om kunden har böter
+                       
+                        else if (customerChoice == "3") 
                         {
                             Console.WriteLine("Ange ditt registreringsnummer för att kontrollera om du har böter:");
                             string regNumber = Console.ReadLine();
@@ -136,8 +136,7 @@ namespace Parking_System
 
                             if (vehicleData != null)
                             {
-                                // Här har vi en tuple: vehicleData.Item1 är fordonet, 
-                                // så vi kan komma åt RegNumber genom vehicleData.Item1.RegNumber.
+                              
                                 Console.WriteLine($"Fordon {vehicleData.Value.Item1.RegNumber} har böter på 500 kr om de är för sena.");
                             }
                             else
@@ -147,7 +146,7 @@ namespace Parking_System
                         }
                         break;
 
-                    case "4": // Avsluta
+                    case "4":
                         Console.WriteLine("Programmet avslutas.");
                         return;
 

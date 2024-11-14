@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Parking_System
 {
-    // Fordonsklasser
+   
     class Vehicle
     {
         public string RegNumber { get; }
@@ -17,8 +17,8 @@ namespace Parking_System
             Color = color;
         }
 
-        public virtual double SpotsNeeded => 1;  // Standardstorlek på parkeringsplats
-        public virtual double CalculateParkingFee(int parkedSeconds) => parkedSeconds * 1.5;  // Standardavgift
+        public virtual double SpotsNeeded => 1; 
+        public virtual double CalculateParkingFee(int parkedSeconds) => parkedSeconds * 1.5; 
     }
 
     class Car : Vehicle
@@ -47,7 +47,7 @@ namespace Parking_System
             Brand = brand;
         }
 
-        public override double SpotsNeeded => 0.5;  // MC tar mindre plats
+        public override double SpotsNeeded => 0.5;  
     }
 
     class Bus : Vehicle
@@ -59,6 +59,6 @@ namespace Parking_System
             PassengerCount = passengerCount;
         }
 
-        public override double SpotsNeeded => 2;  // Bussar tar mer plats
+        public override double SpotsNeeded => 2;  
     }
 }

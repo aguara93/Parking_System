@@ -17,6 +17,8 @@ namespace Parking_System
                 Console.WriteLine("3. Kund (Se status, parkera fordon och kontrollera böter)");
                 Console.WriteLine("4. Avsluta");
                 string choice = Console.ReadLine();
+                Console.Clear(); // Rensar konsolen efter att användaren valt ett alternativ
+
 
                 switch (choice)
                 {
@@ -31,6 +33,8 @@ namespace Parking_System
                         Console.WriteLine("2. Släpp ut Fordon");
                         Console.WriteLine("3. Ge Böter");
                         string guardChoice = Console.ReadLine();
+                        Console.Clear(); // Rensar konsolen efter att användaren valt ett alternativ
+
 
                         if (guardChoice == "1")
                         {
